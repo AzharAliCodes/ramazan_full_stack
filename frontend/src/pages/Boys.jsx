@@ -84,7 +84,7 @@ function Boys() {
   }
 
   // Calculate isLocked - same logic as Sidebar
-  const RAMADAN_START = new Date('2026-02-01');
+  const RAMADAN_START = new Date('2026-02-18');
   const today = new Date();
   const diffTime = today - RAMADAN_START;
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
@@ -103,20 +103,30 @@ function Boys() {
 
       {/* Main Content */}
       <div className="lg:col-span-9 space-y-6 md:space-y-8 p-4 md:p-6 lg:p-10">
-        {/* Sign Out */}
-        <div className="flex justify-end mb-4">
-           <button 
-             onClick={() => { localStorage.removeItem('ramadan_current_user'); window.location.href = '/'; }}
-             className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm flex items-center gap-2"
-           >
-             <span>Sign Out 🚪</span>
-           </button>
-        </div>
-
-        <div className="mb-6 bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-400">
-           <h2 className="text-lg font-bold text-blue-700">🕌 Boys Dashboard</h2>
-           <p className="text-gray-600 text-sm">Stay consistent and maximize your rewards.</p>
-        </div>
+        {/* User Info & Sign Out */}
+        {(() => {
+          const userName = localStorage.getItem('ramadan_name') || 'Student';
+          const userUucms = localStorage.getItem('ramadan_uucms') || '';
+          return (
+            <div className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-400 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow">
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-blue-700 flex items-center gap-2">🕌 {userName}</h2>
+                  {userUucms && <p className="text-gray-500 text-xs font-medium">UUCMS: {userUucms}</p>}
+                </div>
+              </div>
+              <button
+                onClick={() => { localStorage.removeItem('ramadan_current_user'); localStorage.removeItem('ramadan_token'); localStorage.removeItem('ramadan_name'); localStorage.removeItem('ramadan_uucms'); localStorage.removeItem('ramadan_gender'); window.location.href = '/'; }}
+                className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm flex items-center gap-2"
+              >
+                <span>Sign Out 🚪</span>
+              </button>
+            </div>
+          );
+        })()}
 
         <SalahCard
           salah={dayData.salah}

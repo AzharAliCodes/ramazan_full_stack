@@ -1,5 +1,6 @@
 // localStorage key
 const STORAGE_KEY = 'ramadan_tracker_2026';
+const API_URL = 'http://localhost:5000/api';
 
 // Get empty day structure
 export const getEmptyDayData = () => ({
@@ -111,6 +112,37 @@ export const saveData = (data) => {
   }
 };
 
+// Sync day data to the backend database
+const syncToBackend = async (dayNumber, dayData) => {
+  try {
+    const currentUser = JSON.parse(localStorage.getItem('ramadan_current_user') || '{}');
+    const userId = currentUser.id;
+    const uucms = currentUser.uucms || localStorage.getItem('ramadan_uucms');
+
+    if (!userId || !uucms) return; // Not logged in, skip sync
+
+    await fetch(`${API_URL}/days/save`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('ramadan_token')}`,
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        uucms: uucms,
+        day: parseInt(dayNumber),
+        salah: dayData.salah,
+        quran: dayData.quran,
+        dhikr: dayData.dhikr,
+        discipline: dayData.discipline,
+        goodDeeds: dayData.goodDeeds,
+      }),
+    });
+  } catch (error) {
+    console.error('Backend sync failed (data saved locally):', error);
+  }
+};
+
 // Get data for a specific day
 export const getDayData = (allData, dayNumber) => {
   if (!allData.days[dayNumber]) {
@@ -129,5 +161,9 @@ export const updateDayData = (allData, dayNumber, updatedDayData) => {
     }
   };
   saveData(newData);
+
+  // Auto-sync to backend database
+  syncToBackend(dayNumber, updatedDayData);
+
   return newData;
 };
