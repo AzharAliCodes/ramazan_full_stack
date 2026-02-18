@@ -29,9 +29,20 @@ function Boys() {
   // Initialize data on mount
   useEffect(() => {
     const data = loadData();
+    
+    // Calculate actual current day based on date
+    const RAMADAN_START = new Date('2026-02-17');
+    const today = new Date();
+    const diffTime = today - RAMADAN_START;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    const actualCurrentDay = Math.max(1, Math.min(diffDays, 30));
+
+    // Update state
     setAllData(data);
-    setCurrentDay(data.currentDay);
-    const currentDayData = getDayData(data, data.currentDay);
+    setCurrentDay(actualCurrentDay); // Set to actual day, not stored day
+    
+    // Get data for the actual current day
+    const currentDayData = getDayData(data, actualCurrentDay);
     setDayData(currentDayData);
   }, []);
 
@@ -84,7 +95,7 @@ function Boys() {
   }
 
   // Calculate isLocked - same logic as Sidebar
-  const RAMADAN_START = new Date('2026-02-18');
+  const RAMADAN_START = new Date('2026-02-17');
   const today = new Date();
   const diffTime = today - RAMADAN_START;
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
