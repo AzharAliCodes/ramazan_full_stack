@@ -8,24 +8,39 @@ function SignIn() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    // Check localStorage for registered users
-    const users = JSON.parse(localStorage.getItem('ramadan_users') || '[]');
-    const user = users.find(u => u.email === email && u.password === password);
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    setTimeout(() => {
-      if (user) {
-        localStorage.setItem('ramadan_current_user', JSON.stringify(user));
-        navigate(user.gender === 'female' ? '/girls' : '/boys');
-      } else {
-        setError('Invalid email or password. Please try again.');
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || 'Invalid email or password. Please try again.');
+        setLoading(false);
+        return;
       }
+
+      // Save to localStorage
+      localStorage.setItem('ramadan_token', data.token);
+      localStorage.setItem('ramadan_current_user', JSON.stringify(data.user));
+      localStorage.setItem('ramadan_name', data.user.name);
+      localStorage.setItem('ramadan_uucms', data.user.uucms);
+      localStorage.setItem('ramadan_gender', data.user.gender);
+
+      navigate(data.user.gender === 'female' ? '/girls' : '/boys');
+    } catch (err) {
+      setError('Could not connect to server. Please try again.');
+    } finally {
       setLoading(false);
-    }, 600);
+    }
   };
 
   return (

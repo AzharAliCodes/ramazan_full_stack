@@ -103,11 +103,8 @@ function Girls() {
 
       {/* Main Content */}
       <div className="lg:col-span-9 space-y-6 md:space-y-8 p-4 md:p-6 lg:p-10">
-        {/* Navigation Switcher */}
-        <div className="flex justify-end gap-2 mb-4">
-           <Link to="/boys" className="px-4 py-2 bg-amber-100 text-amber-800 rounded-lg hover:bg-amber-200 transition-colors font-medium text-sm flex items-center gap-2">
-             <span>Switch to Boys View 🕌</span>
-           </Link>
+        {/* Sign Out */}
+        <div className="flex justify-end mb-4">
            <button 
              onClick={() => { localStorage.removeItem('ramadan_current_user'); window.location.href = '/'; }}
              className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm flex items-center gap-2"

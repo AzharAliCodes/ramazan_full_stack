@@ -14,7 +14,7 @@ function SignUp() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -35,27 +35,35 @@ function SignUp() {
 
     setLoading(true);
 
-    // Save to localStorage
-    const users = JSON.parse(localStorage.getItem('ramadan_users') || '[]');
-    
-    // Check if email already exists
-    if (users.find(u => u.email === email)) {
-      setError('An account with this email already exists.');
-      setLoading(false);
-      return;
-    }
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, uucms, stream, year, gender }),
+      });
 
-    const newUser = { name, email, password, uucms, stream, year, gender, createdAt: new Date().toISOString() };
-    users.push(newUser);
-    localStorage.setItem('ramadan_users', JSON.stringify(users));
+      const data = await res.json();
 
-    setTimeout(() => {
-      // Auto sign in after registration
-      localStorage.setItem('ramadan_current_user', JSON.stringify(newUser));
+      if (!res.ok) {
+        setError(data.message || 'Signup failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      // Save to localStorage
+      localStorage.setItem('ramadan_token', data.token);
+      localStorage.setItem('ramadan_current_user', JSON.stringify(data.user));
+      localStorage.setItem('ramadan_name', data.user.name);
+      localStorage.setItem('ramadan_uucms', data.user.uucms);
+      localStorage.setItem('ramadan_gender', data.user.gender);
+
       // Redirect based on gender
       navigate(gender === 'female' ? '/girls' : '/boys');
+    } catch (err) {
+      setError('Could not connect to server. Please try again.');
+    } finally {
       setLoading(false);
-    }, 600);
+    }
   };
 
   return (
